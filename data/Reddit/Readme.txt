@@ -1,0 +1,1 @@
+This directory is used to store Reddit dialogue dataset and KBs.
