@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 import json
+import argparse
 from .retriever import Queryer
 
 
-DATA_DIR = "/data/jwang/TransDG/data/Reddit"
-INDEX_DIR = "/data/jwang/TransDG/index"
+DATA_DIR = "./data/Reddit"
+INDEX_DIR = "./index"
 
 
-def data_gen():
+def data_gen(top_k=3):
     train_post, train_res = [], []
     valid_post, valid_res = [], []
     test_post, test_res, test_entities = [], [], []
@@ -43,7 +44,7 @@ def data_gen():
         id2response = json.load(file)
 
     cnt = 0
-    queryer = Queryer(INDEX_DIR, top_k=3)
+    queryer = Queryer(INDEX_DIR, top_k=top_k)
 
     with open('%s/train.txt' % DATA_DIR, 'w') as fw:
         for post, res in zip(train_post, train_res):
@@ -128,5 +129,14 @@ def _validate(query):
     return valid_query
 
 
+def main(args):
+    data_gen(top_k=args.top_k)
+
+
 if __name__ == '__main__':
-    data_gen()
+    parser = argparse.ArgumentParser(description="Generate top-k similar responses for dataset")
+    parser.add_argument('--top_k', type=int, default=3, help='top-k')
+    parsed_args = parser.parse_args()
+
+    main(parsed_args)
+    

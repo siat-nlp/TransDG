@@ -74,13 +74,9 @@ class TransDGModelMultistep(object):
         self.entities = tf.placeholder(tf.string, (None, None, None), 'entities')
         self.trans_reprs = tf.placeholder(tf.float32, (None, None, self.num_units), 'trans_reprs')
 
-    def _init_embed(self, word_embed, kd_embed):
+    def _init_embed(self, word_embed, kd_embed=None):
         self.word_embed = tf.get_variable('word_embed', dtype=tf.float32,
                                           initializer=word_embed, trainable=False)  # [vocab_size, dim_emb]
-
-        # TODO: random initialize and trainable
-        #self.kd_embed = tf.get_variable('kd_embed', dtype=tf.float32,
-        #                                initializer=kd_embed, trainable=True)  # [kd_size, dim_trans]
 
     def _init_select_layer(self, param_dict):
         """
@@ -119,31 +115,16 @@ class TransDGModelMultistep(object):
         # build the vocab table (string to index)
         batch_size = tf.shape(self.posts)[0]
         post_word_id = self.symbol2index.lookup(self.posts)
-        post_word_input = tf.nn.embedding_lookup(self.word_embed, post_word_id)  # batch*len*unit
+        post_word_input = tf.nn.embedding_lookup(self.word_embed, post_word_id)  # [batch, len, unit]
 
         corr_responses_id = self.symbol2index.lookup(self.corr_responses)  # [batch, topk, len]
         corr_responses_input = tf.nn.embedding_lookup(self.word_embed, corr_responses_id)  # [batch, topk, len, unit]
-
-        # TODO:kd_embed
-        #triple_id = self.kd2index.lookup(self.triples)
-        #triple_input = tf.nn.embedding_lookup(self.kd_embed, triple_id)
-        #triple_num = tf.shape(self.triples)[1]
-        #triple_input = tf.reshape(triple_input, [batch_size, triple_num, -1, 3*self.dim_trans])
-        #triple_input = tf.reduce_mean(triple_input, axis=2)  # [batch, triple_num, 3*dim_trans]
 
         triple_id = self.symbol2index.lookup(self.triples)
         triple_input = tf.nn.embedding_lookup(self.word_embed, triple_id)
         triple_num = tf.shape(self.triples)[1]
         triple_input = tf.reshape(triple_input, [batch_size, triple_num, -1, 3 * self.dim_emb])
         triple_input = tf.reduce_mean(triple_input, axis=2)  # [batch, triple_num, 3*dim_emb]
-
-        #entity_id = self.symbol2index.lookup(self.entities)
-        #entity_input = tf.nn.embedding_lookup(self.word_embed, entity_id)
-        #entity_num = tf.shape(self.entities)[1]
-        #entity_input = tf.reshape(entity_input, [batch_size, entity_num, -1, self.dim_emb])
-        #entity_input = tf.reduce_mean(entity_input, axis=2)  # [batch, triple_num, dim_emb]
-        #entity_input = tf.reshape(entity_input, [batch_size, -1, self.dim_emb])
-        #triple_input = entity_input
 
         encoder_output, encoder_state = self.build_encoder(post_word_input,
                                                            corr_responses_input,
@@ -154,7 +135,7 @@ class TransDGModelMultistep(object):
             decoder_len = tf.shape(self.responses)[1]
             resp_word_id = tf.concat([tf.ones([batch_size, 1], dtype=tf.int64) * GO_ID,
                                       tf.split(resp_target, [decoder_len - 1, 1], 1)[0]], 1)  # [batch,len]
-            resp_word_input = tf.nn.embedding_lookup(self.word_embed, resp_word_id)  # batch*len*unit
+            resp_word_input = tf.nn.embedding_lookup(self.word_embed, resp_word_id)  # [batch, len, unit]
             decoder_mask = tf.reshape(tf.cumsum(
                 tf.one_hot(self.responses_length - 1, decoder_len), reverse=True, axis=1),
                 [-1, decoder_len])
@@ -266,7 +247,6 @@ class TransDGModelMultistep(object):
                     kd_context1 = self.transfer_matching(encoder_output, triple_input)
                 else:
                     kd_context1 = None
-                print("kd_context1:", kd_context1.shape)
 
                 # prepare attention
                 attention_keys1, attention_values1, attention_construct_fn1 \
@@ -286,32 +266,12 @@ class TransDGModelMultistep(object):
                                                             scope=scope1)
                 output_fn1 = create_output_fn(vocab_size=self.vocab_size)
                 output_logits1 = output_fn1(decoder_output1)
-                '''
-                output_fn1 = create_output_fn(vocab_size=self.vocab_size)
-                # inference decoder step 1
-                max_len = 29
-                decoder_fn1 = attention_decoder_inference(
-                    num_units=self.num_units, num_decoder_symbols=self.vocab_size,
-                    output_fn=output_fn1, encoder_state=encoder_state,
-                    attention_keys=attention_keys1, attention_values=attention_values1,
-                    attention_construct_fn=attention_construct_fn1, embeddings=self.word_embed,
-                    start_of_sequence_id=GO_ID, end_of_sequence_id=EOS_ID, maximum_length=max_len,
-                    is_pass1=True
-                )
-                # get decoder hidden output
-                decoder_output1, _, _ = dynamic_rnn_decoder(cell=decoder_cell_step1,
-                                                            decoder_fn=decoder_fn1,
-                                                            scope=scope1)
-                output_fn1 = create_output_fn(vocab_size=self.vocab_size)
-                output_logits1 = output_fn1(decoder_output1)
-                '''
 
             with tf.variable_scope('decoder_step2', reuse=tf.AUTO_REUSE) as scope2:
                 if self.use_trans_select:
                     kd_context2 = self.transfer_matching(decoder_output1, triple_input)
                 else:
                     kd_context2 = None
-                print("kd_context2:", kd_context2.shape)
                 attention_keys2, attention_values2, attention_construct_fn2 \
                     = prepare_multistep_attention(encoder_output, decoder_output1,
                                                   kd_context1, kd_context2,
@@ -379,9 +339,6 @@ class TransDGModelMultistep(object):
                 return decoder_distribution
 
     def transfer_matching(self, context_repr, knowledge_repr):
-        print("context_repr:", context_repr.shape)
-        print("knowledge_repr:", knowledge_repr.shape)
-
         context = tf.reduce_mean(context_repr, axis=1)  # [batch, num_units]
         kd_num = tf.shape(knowledge_repr)[1]
         context_tile = tf.tile(tf.expand_dims(context, axis=1), [1, kd_num, 1])  # [batch, kd_num, num_units]

@@ -1,0 +1,1 @@
+This directory is used to store index files for Lucene retrieving.

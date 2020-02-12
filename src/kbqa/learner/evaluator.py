@@ -17,7 +17,7 @@ class Evaluator:
 
         self.scan_data = 0
         self.scan_batch = 0
-        self.tb_point = 0       # x-axis in tensorboard
+        self.tb_point = 0 
         self.eval_detail_dict = {}      # store evaluation detail of each data
 
     def _reset_eval_info(self):
@@ -35,7 +35,7 @@ class Evaluator:
             for val in batch_val:
                 self.eval_detail_dict.setdefault(tensor_name, []).append(val)
 
-        # Collect all input / outputs of this batch, saving into eval_detail_dict (split by each data point)
+        # collect all input / outputs of this batch, saving into eval_detail_dict (split by each data point)
         self.scan_data += local_size
         self.scan_batch += 1
         self.tb_point += 1
@@ -75,7 +75,6 @@ class Evaluator:
         if detail_fp is not None:
             bw = open(detail_fp, 'w')
             LogInfo.redirect(bw)
-            #np.set_printoptions(threshold=np.nan)
             LogInfo.logs('Avg_f1 = %.6f', ret_metric)
             srt_q_idx_list = sorted(ret_q_score_dict.keys())
             for q_idx in srt_q_idx_list:
@@ -96,7 +95,6 @@ class Evaluator:
                 LogInfo.end_track()
             LogInfo.logs('Avg_f1 = %.6f', ret_metric)
 
-            #np.set_printoptions()  # reset output format
             LogInfo.stop_redirect()
             bw.close()
 

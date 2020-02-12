@@ -75,13 +75,13 @@ parser.add_argument('--verbose', type=int, default=1, help='verbose level')
 
 def main(args):
 
-    # ==== Loading Necessary Utils ====
+    # ==== Loading necessary utils ====
     LogInfo.begin_track('Loading Utils ... ')
     wd_emb_util = WordEmbeddingUtil(emb_dir=args.emb_dir, dim_emb=args.dim_emb)
     freebase_helper = FreebaseHelper(meta_dir=args.fb_meta_dir)
     LogInfo.end_track()
 
-    # ==== Loading Dataset ====
+    # ==== Loading dataset ====
     LogInfo.begin_track('Creating Dataset ... ')
     schema_dataset = SchemaDataset(data_dir=args.data_dir, candgen_dir=args.candgen_dir,
                                    schema_level=args.schema_level, freebase_helper=freebase_helper)
@@ -96,7 +96,7 @@ def main(args):
                                neg_strategy=args.neg_strategy)
     LogInfo.end_track()
 
-    # ==== Building Model ====
+    # ==== Building model ====
     LogInfo.begin_track('Building Model and Session ... ')
     model_config = {'qw_max_len': args.qw_max_len,
                     'pw_max_len': args.pw_max_len,
@@ -238,7 +238,7 @@ def main(args):
             LogInfo.end_track()
         LogInfo.end_track()
 
-        # Display & save states (results, details, params)
+        # display & save states (results, details, params)
         cur_valid_f1 = disp_item_dict['valid_F1']
         if cur_valid_f1 > best_valid_f1:
             best_valid_f1 = cur_valid_f1

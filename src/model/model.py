@@ -73,13 +73,9 @@ class TransDGModel(object):
         self.triples = tf.placeholder(tf.string, (None, None, None, 3), 'triples')
         self.trans_reprs = tf.placeholder(tf.float32, (None, None, self.num_units), 'trans_reprs')
 
-    def _init_embed(self, word_embed, kd_embed):
+    def _init_embed(self, word_embed, kd_embed=None):
         self.word_embed = tf.get_variable('word_embed', dtype=tf.float32,
                                           initializer=word_embed, trainable=False)  # [vocab_size, dim_emb]
-
-        # TODO: random initialize and trainable !!!!!!!!!!!
-        #self.kd_embed = tf.get_variable('kd_embed', dtype=tf.float32,
-        #                                initializer=kd_embed, trainable=True)  # [kd_size, dim_trans]
 
     def _init_select_layer(self, param_dict):
         """
@@ -123,13 +119,6 @@ class TransDGModel(object):
         corr_responses_id = self.symbol2index.lookup(self.corr_responses)  # [batch, topk, len]
         corr_responses_input = tf.nn.embedding_lookup(self.word_embed, corr_responses_id)  # [batch, topk, len, unit]
 
-        # TODO:kd_embed!!!!!!
-        #triple_id = self.kd2index.lookup(self.triples)
-        #triple_input = tf.nn.embedding_lookup(self.kd_embed, triple_id)
-        #triple_num = tf.shape(self.triples)[1]
-        #triple_input = tf.reshape(triple_input, [batch_size, triple_num, -1, 3*self.dim_trans])
-        #triple_input = tf.reduce_mean(triple_input, axis=2)  # [batch, triple_num, 3*dim_trans]
-
         triple_id = self.symbol2index.lookup(self.triples)
         triple_input = tf.nn.embedding_lookup(self.word_embed, triple_id)
         triple_num = tf.shape(self.triples)[1]
@@ -140,7 +129,7 @@ class TransDGModel(object):
         decoder_len = tf.shape(self.responses)[1]
         resp_word_id = tf.concat([tf.ones([batch_size, 1], dtype=tf.int64) * GO_ID,
                                   tf.split(resp_target, [decoder_len - 1, 1], 1)[0]], 1)  # [batch,len]
-        resp_word_input = tf.nn.embedding_lookup(self.word_embed, resp_word_id)  # batch*len*unit
+        resp_word_input = tf.nn.embedding_lookup(self.word_embed, resp_word_id) 
         decoder_mask = tf.reshape(tf.cumsum(
             tf.one_hot(self.responses_length - 1, decoder_len), reverse=True, axis=1),
             [-1, decoder_len])
@@ -206,7 +195,7 @@ class TransDGModel(object):
             context_mutual = tf.reduce_sum(tf.expand_dims(alignments, 2) * encoder_out_tiled, axis=1)
             context_mutual = tf.reshape(context_mutual, [batch_size, -1, self.num_units])
             context_mutual = tf.reduce_mean(context_mutual, axis=1)
-            print("context_mutual:", context_mutual.shape)
+    
         encoder_output = tf.concat([encoder_output, tf.expand_dims(context_mutual, 1)], axis=1)
 
         if self.use_trans_repr:
@@ -271,9 +260,6 @@ class TransDGModel(object):
                 return decoder_distribution
 
     def transfer_matching(self, context_repr, knowledge_repr):
-        print("context_repr:", context_repr.shape)      # [batch, len, num_units]
-        print("knowledge_repr:", knowledge_repr.shape)  # [batch, triple_num, 3*dim_trans]
-
         context = tf.reduce_mean(context_repr, axis=1)  # [batch, num_units]
         triple_num = tf.shape(self.triples)[1]
         context_tile = tf.tile(tf.expand_dims(context, axis=1), [1, triple_num, 1])  # [batch, triple_num, num_units]
@@ -294,7 +280,6 @@ class TransDGModel(object):
         kd_context = tf.matmul(tf.expand_dims(em_scores, axis=1), knowledge)
         kd_context = tf.reshape(kd_context, [batch_size, self.dim_emb])
 
-        print("kd_context:", kd_context.shape)  # expect to be [batch, dim_emb]
         return kd_context
 
     def set_vocabs(self, session, vocab, kd_vocab):

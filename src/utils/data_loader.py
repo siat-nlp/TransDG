@@ -17,17 +17,12 @@ def load_data(data_dir, is_train=False):
     if is_train:
         with open('%s/train.txt' % data_dir) as f:
             for idx, line in enumerate(f):
-                # ========================================================
                 data_train.append(json.loads(line))
-                if idx % 100000 == 0 and idx > 0:
+                if idx > 0 and idx % 100000 == 0:
                     print('read train file line %d' % idx)
-                #if idx < 200000:
-                #    data_train.append(json.loads(line))
-                # ========================================================
         with open('%s/valid.txt' % data_dir) as f:
             for line in f:
                 data_dev.append(json.loads(line))
-
     else:
         with open('%s/test.txt' % data_dir) as f:
             for line in f:
@@ -45,10 +40,7 @@ def load_trans_data(dir, is_train=False):
 
     if is_train:
         # TODO：revise to automatically check
-        # ========================================================
         train_list = list(range(0, 34))
-        #train_list = list(range(0, 2))    # we only get 200000 data
-        # ========================================================
         train_list = [str(id) for id in train_list]
         sent_repr = []
         rm_final_feats = []

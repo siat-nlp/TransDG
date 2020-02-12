@@ -12,7 +12,8 @@ import argparse
 from stanfordcorenlp import StanfordCoreNLP
 from src.kbqa.utils.log_util import LogInfo
 
-CORENLP_PATH = "/home/newname/lib/stanford-corenlp-full-2018-02-27/"
+# set StandfordCoreNLP lib path
+CORENLP_PATH = "/lib/stanford-corenlp-full-2018-02-27/"
 punc_mask_str = "?!:', "
 year_re = re.compile(r'^[1-2][0-9][0-9][0-9]$')
 

@@ -47,7 +47,6 @@ def analyze_status(status_fp):
         if line.startswith('Epoch'):
             start_idx = line_idx
 
-    # Now got the last header
     ret_dict = {}       # <Key, [Value]>
     header_spt = lines[start_idx].strip().replace(' ', '\t').split('\t')
     for key in header_spt:

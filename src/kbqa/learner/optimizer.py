@@ -13,8 +13,8 @@ class Optimizer:
         self.ob_batch_num = ob_batch_num
         self.scan_data = 0
         self.scan_batch = 0
-        self.ret_loss = 0.
-        self.tb_point = 0  # x-axis in tensorboard
+        self.ret_loss = 0
+        self.tb_point = 0 
 
     def _reset_optm_info(self):
         self.scan_data = self.scan_batch = 0
@@ -25,7 +25,7 @@ class Optimizer:
 
         _, local_loss, summary = self.model.train_batch(self.sess, local_data)
         local_loss = float(local_loss)
-        self.ret_loss = 1. * (self.ret_loss * self.scan_data + local_loss * local_size) / (self.scan_data + local_size)
+        self.ret_loss = 1.0 * (self.ret_loss * self.scan_data + local_loss * local_size) / (self.scan_data + local_size)
         self.scan_data += local_size
         self.scan_batch += 1
         self.tb_point += 1

@@ -24,9 +24,6 @@ parser.add_argument('--model_dir', type=str, help='KBQA model dir')
 parser.add_argument('--log_dir', type=str, help='Output log dir')
 parser.add_argument('--mode', type=str, default='train', choices=['train', 'test'])
 parser.add_argument('--multi_step', action="store_true")
-parser.add_argument('--no_trans_repr', action="store_true")
-parser.add_argument('--no_trans_select', action='store_true')
-parser.add_argument('--no_use_guiding', action='store_true')
 
 # model config arguments
 parser.add_argument('--cell_class', type=str, default='GRU', choices=['RNN', 'GRU', 'LSTM'])
@@ -59,42 +56,31 @@ def main(args):
     if not os.path.exists(args.log_dir):
         os.makedirs(args.log_dir)
 
-    if args.no_trans_repr:
-        kbqa_model = None
-        trans_sess = None
-    else:
-        # load transferred model params
-        config_path = "%s/config.json" % args.model_dir
-        with open(config_path, 'r') as fr:
-            kbqa_model_config = json.load(fr)
+    # load transferred model params
+    config_path = "%s/config.json" % args.model_dir
+    with open(config_path, 'r') as fr:
+        kbqa_model_config = json.load(fr)
 
-        trans_graph = tf.Graph()
-        with trans_graph.as_default():
-            kbqa_model = KbqaModel(**kbqa_model_config)
-            trans_saver = tf.train.Saver()
+    trans_graph = tf.Graph()
+    with trans_graph.as_default():
+        kbqa_model = KbqaModel(**kbqa_model_config)
+        trans_saver = tf.train.Saver()
 
-        trans_sess = tf.Session(config=config, graph=trans_graph)
-        model_path = '%s/model_best/best.model' % args.model_dir
-        trans_saver.restore(trans_sess, save_path=model_path)
+    trans_sess = tf.Session(config=config, graph=trans_graph)
+    model_path = '%s/model_best/best.model' % args.model_dir
+    trans_saver.restore(trans_sess, save_path=model_path)
+    param_path = '%s/detail/param.best.pkl' % args.model_dir
 
-    if args.no_trans_select:
-        feed_parm = None
-    else:
-        param_path = '%s/detail/param.best.pkl' % args.model_dir
-        with open(param_path, 'rb') as fr:
-            param_dict = pickle.load(fr)
-            if len(param_dict.keys()) == 1:
-                feed_parm = {'bilinear_mat': param_dict['rm_task/rm_forward/bilinear_mat']}
-                print("bilinear_mat:", feed_parm['bilinear_mat'].shape)
-            else:
-                feed_parm = {'fc1_weights': param_dict['rm_task/rm_forward/fc1/weights'],
-                             'fc1_biases': param_dict['rm_task/rm_forward/fc1/biases'],
-                             'fc2_weights': param_dict['rm_task/rm_forward/fc2/weights'],
-                             'fc2_biases': param_dict['rm_task/rm_forward/fc2/biases']}
-                print("fc1_weights:", feed_parm['fc1_weights'].shape)
-                print("fc1_biases:", feed_parm['fc1_biases'].shape)
-                print("fc2_weights:", feed_parm['fc2_weights'].shape)
-                print("fc2_biases:", feed_parm['fc2_biases'].shape)
+    with open(param_path, 'rb') as fr:
+        param_dict = pickle.load(fr)
+        if len(param_dict.keys()) == 1:
+            feed_parm = {'bilinear_mat': param_dict['rm_task/rm_forward/bilinear_mat']}
+        else:
+            feed_parm = {'fc1_weights': param_dict['rm_task/rm_forward/fc1/weights'], 
+            'fc1_biases': param_dict['rm_task/rm_forward/fc1/biases'],
+            'fc2_weights': param_dict['rm_task/rm_forward/fc2/weights'],
+            'fc2_biases': param_dict['rm_task/rm_forward/fc2/biases']}
+    
 
     # load knowledge
     kd_loader = KnowledgeLoader(args.kd_dir)

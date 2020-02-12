@@ -59,7 +59,6 @@ def main():
 if __name__ == "__main__":
     main()
 
-    #query = "first sand snake scene i 've liked"
     query = "i reddit at work because it is better than working . what makes this a reason"
     queryer = Queryer(INDEX_DIR, top_k=5)
     results = queryer.run_query(query)

@@ -1,0 +1,1 @@
+This directory is used to store temporary files for both KBQA pre-training and transferring.

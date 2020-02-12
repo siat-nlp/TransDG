@@ -174,7 +174,6 @@ class SchemaBuilder:
             'pw_len': pw_len,
             'pseq_ids': pseq_ids,
             'pseq_len': pseq_len,
-
             'qw_input': qw_input,
             'qw_len': qw_len,
             'dep_input': dep_input,

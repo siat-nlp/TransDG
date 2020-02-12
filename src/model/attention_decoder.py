@@ -247,10 +247,8 @@ def _create_attention_construct_fn(name, num_units, attention_score_fn, reuse):
                     concat_input = array_ops.concat([attention_query, context1, context2], 1)
                 else:
                     if decoder_reprs is None:
-                        print("concat=3")
                         concat_input = array_ops.concat([attention_query, context1, kd_states1, kd_states2], 1)
                     else:
-                        print("concat=4")
                         context2 = attention_score_fn2(attention_query, attention_keys2, decoder_reprs)
                         concat_input = array_ops.concat([attention_query, context1, context2, kd_states1, kd_states2], 1)
             else:  # only one step decoding

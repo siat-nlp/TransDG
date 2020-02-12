@@ -105,23 +105,6 @@ def compute_bleu(reference_corpus, translation_corpus, max_order=4, smooth=False
 
 
 if __name__ == '__main__':
-    '''
-    res_file = "/data/jwang/TransDG/log5/output/test-model-125000.log"
-    references = []
-    hypothesis = []
-    with open(res_file, 'r') as fr:
-        for line in fr:
-            if line.startswith('response:'):
-                ref = line.split('response:')[1]
-                ref_list = ref.split()
-                references.append(ref_list)
-            elif line.startswith('result:'):
-                hyp = line.split('result:')[1]
-                hyp_list = hyp.split()
-                hypothesis.append(hyp_list)
-    print("references:", references[:3])
-    print("hypothesis:", hypothesis[:3])
-    '''
     references = [[['i', 'love', 'china', 'and', 'my', 'family']]]
     hypothesis = [['i', 'love', 'america', 'and', 'his', 'family']]
     bleu_score, precisions, bp, ratio, translation_length, reference_length = \
