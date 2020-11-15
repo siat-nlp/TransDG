@@ -4,10 +4,9 @@
 python_path='python3 -m'
 
 # set arguments
-data_name=Reddit   # ["SimpQ", "Reddit"]
-mode=test        # only for Reddit dataset, mode=["train", "valid", "test"]
-data_dir=./data/SimpleQuestions_v2
-#data_dir=./data/Reddit
+data_name=SimpQ   # ["SimpQ", "Reddit"]
+mode=test         # only for Reddit dataset, mode=["train", "valid", "test"]
+data_dir=./data/SimpleQuestions_v2  # ["data/SimpleQuestions_v2", "data/Reddit"]
 
 fb_dir=./data/SimpleQuestions_v2/freebase-subsets
 fb_meta_dir=./data/freebase-metadata
