@@ -1,0 +1,1 @@
+This directory is used to store Glove embeddings for pre-training KBQA.
