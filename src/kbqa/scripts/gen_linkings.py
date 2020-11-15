@@ -252,7 +252,7 @@ def load_reddit(data_dir, mode='train'):
     LogInfo.logs('Reddit initializing ... ')
     dg_list = []
     corenlp = StanfordCoreNLP(CORENLP_PATH)
-    fp = '%s/%s_v3.txt' % (data_dir, mode)
+    fp = '%s/%s.txt' % (data_dir, mode)
     with open(fp, 'r') as br:
         for line in br:
             dg_line = json.loads(line)

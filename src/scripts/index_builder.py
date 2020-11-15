@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 import os
 import json
-from .retriever import Indexer, Queryer
-
-DATA_DIR = "./data/Reddit"
-INDEX_DIR = "./index"
+import argparse
+from src.utils.retriever import Indexer, Queryer
 
 
 def load_raw_trainset(data_dir):
@@ -42,30 +40,24 @@ def build_mapping(data, index_dir):
     return id2post
 
 
-def main():
-    if not os.path.exists(INDEX_DIR):
-        os.mkdir(INDEX_DIR)
+def main(args):
+    if not os.path.exists(args.index_dir):
+        os.makedirs(args.index_dir)
     # load train data
-    data_train = load_raw_trainset(DATA_DIR)
+    data_train = load_raw_trainset(args.data_dir)
 
     # build mappings: <id, post>, <id, response>
-    id2post = build_mapping(data_train, INDEX_DIR)
+    id2post = build_mapping(data_train, args.index_dir)
 
-    # build data indexes of posts
-    indexer = Indexer(INDEX_DIR)
+    # build data index of posts
+    indexer = Indexer(args.index_dir)
     indexer.build_index(id2post)
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Build index for retrieving")
+    parser.add_argument('--data_dir', type=str, help="Reddit data directory")
+    parser.add_argument('--index_dir', type=str, help="Reddit index directory")
+    parsed_args = parser.parse_args()
 
-    query = "i reddit at work because it is better than working . what makes this a reason"
-    queryer = Queryer(INDEX_DIR, top_k=5)
-    results = queryer.run_query(query)
-    print("query:", query)
-
-    ids = results["ids"]
-    contents = results["contents"]
-    for i in range(len(ids)):
-        print("id:", ids[i])
-        print("content:", contents[i])
+    main(parsed_args)
