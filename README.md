@@ -76,7 +76,7 @@ sh run_test.sh
 
 ## Citation
 If you use any source code included in this project in your work, please cite as:
-```
+```bibtex
 @inproceedings{wang2020improving,
   title={Improving Knowledge-Aware Dialogue Generation via Knowledge Base Question Answering.},
   author={Wang, Jian and Liu, Junhao and Bi, Wei and Liu, Xiaojiang and He, Kejing and Xu, Ruifeng and Yang, Min},
