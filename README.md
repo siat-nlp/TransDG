@@ -13,7 +13,7 @@ In this paper, we propose a novel knowledge-aware dialogue generation model (cal
 
 ## Datasets
 
-The SimpleQuestions (v2) dataset and FB2M can be downloaded from [here](https://research.fb.com/downloads/babi/), the Reddit dialogue dataset associated with ConceptNet can be downloaded from [here](http://coai.cs.tsinghua.edu.cn/hml/dataset/#commonsense). Also, please download the Freebase metadata from [here](https://pan.baidu.com/s/1MauWDI5NY23J_5FKUOGHaw) (extraction code: iwq1) and unpack to the folder `data/freebase-metadata/`, download the Glove embeddings from [here](https://pan.baidu.com/s/1ekrkqxuLhSMfqHELxLOJnA) (extraction code: vxc3) and unpack to the folder `data/kbqa_emb/`.
+The SimpleQuestions (v2) dataset and FB2M can be downloaded from this [page](https://research.fb.com/downloads/babi/), the Reddit dialogue dataset associated with ConceptNet can be downloaded from this Github [repo](https://github.com/thu-coai/ccm). Please download the Freebase metadata from [Baidu Netdisk](https://pan.baidu.com/s/1MauWDI5NY23J_5FKUOGHaw) (extraction code: iwq1) and unpack to the folder `data/freebase-metadata/`, and download the Glove embeddings from [Baidu Netdisk](https://pan.baidu.com/s/1ekrkqxuLhSMfqHELxLOJnA) (extraction code: vxc3) and unpack to the folder `data/kbqa_emb/`.
 
 ## Quickstart
 
